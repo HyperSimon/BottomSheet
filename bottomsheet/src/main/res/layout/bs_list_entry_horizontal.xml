@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/BottomSheet.ListItem"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@id/bs_list_image"
+        style="@style/BottomSheet.ListItemImage"
+        android:layout_centerVertical="true"
+        tools:ignore="ContentDescription" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/activity_margin"
+        android:layout_marginRight="@dimen/activity_margin"
+        android:layout_toRightOf="@id/bs_list_image"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@id/bs_list_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textColor="@color/primary_text_dark"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/bs_list_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_horizontal"
+            android:textColor="@color/hint_text_dark" />
+    </LinearLayout>
+</RelativeLayout>
+
+    <!-- From: file:/D:/develop/BottomSheet/library/src/main/res/layout/bs_list_entry.xml -->
