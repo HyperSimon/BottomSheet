@@ -2,6 +2,7 @@ package com.roselism.bottomsheet_alpha;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
@@ -21,28 +22,24 @@ public class MainActivity extends AppCompatActivity {
                 BottomSheet.Builder sheet = new BottomSheet.Builder(MainActivity.this,
                         R.style.BottomSheet_Dialog);
 
-                sheet.sheet(30, "adsfasdf");
-//                sheet.sheet("sheet1", "adsf", new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//
-//                    }
-//                });
-//
-//                sheet.sheet("a", new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//
-//                    }
-//                });
-//
-//                sheet.sheet("sheet2", "adsf", new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//
-//                    }
-//                });
+                sheet.sheet(R.menu.main_menu)
+                        .listener(new MenuItem.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem item) {
+                                switch (item.getItemId()) {
+                                    case R.id.add_email_account:
+                                        return true;
 
+                                    case R.id.add_storage_account:
+                                        return true;
+                                }
+
+                                return true;
+                            }
+                        });
+                sheet.sheet(111, "adfadfs");
+                sheet.sheet(1121, "adfadfs");
+                sheet.sheet(1131, "adfadfs");
 
                 sheet.build().show();
             }

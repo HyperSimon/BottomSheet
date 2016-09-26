@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/add_email_account"
+        android:icon="@drawable/bs_ic_clear"
+        android:title="a"></item>
+
+    <item
+        android:id="@+id/add_storage_account"
+        android:icon="@drawable/bs_ic_clear"
+        android:title="aofjadsiofd"></item>
+
+    <item
+        android:id="@+id/cancle"
+        android:icon="@drawable/bs_ic_clear"
+        android:title="adsfjadsifjadisfi"></item>
+
+</menu>

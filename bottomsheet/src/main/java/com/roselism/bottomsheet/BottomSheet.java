@@ -77,6 +77,7 @@ public class BottomSheet extends Dialog implements DialogInterface {
     public static final int ONE = 0x01;
     public static final int TWO = 0x02;
     public static final int NORMAL = 0x03;
+    public static final int MENU = 0x04;
 
     private final SparseIntArray hidden = new SparseIntArray();
     private TranslucentHelper helper;
@@ -112,7 +113,8 @@ public class BottomSheet extends Dialog implements DialogInterface {
     BottomSheet(Context context, int theme) {
         super(context, theme);
 
-        TypedArray a = getContext().obtainStyledAttributes(null, R.styleable.BottomSheet, R.attr.bottomSheetStyle, 0);
+        TypedArray a = getContext()
+                .obtainStyledAttributes(null, R.styleable.BottomSheet, R.attr.bottomSheetStyle, 0);
         mHasContent = builder.hasContent;
         try {
             more = a.getDrawable(R.styleable.BottomSheet_bs_moreDrawable);
@@ -124,14 +126,18 @@ public class BottomSheet extends Dialog implements DialogInterface {
 
             if (theme == R.style.BottomSheet_DialogHorizontalContent) {
                 mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout,
-                        mHasContent ? R.layout.bs_list_entry_hor_two : R.layout.bs_list_entry_hor_one);
+                        mHasContent ? R.layout.bs_list_entry_hor_two
+                                : R.layout.bs_list_entry_hor_one);
             } else if (theme == R.style.BottomSheet_Dialog) {
-                mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout, R.layout.bs_list_entry_normal);
+                mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout,
+                        R.layout.bs_list_entry_normal);
             } else {
-                mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout, R.layout.bs_list_entry_normal);
+                mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout,
+                        R.layout.bs_list_entry_normal);
             }
 
-            mGridItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_gridItemLayout, R.layout.bs_grid_entry);
+            mGridItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_gridItemLayout,
+                    R.layout.bs_grid_entry);
 
         } finally {
             a.recycle();
@@ -148,7 +154,8 @@ public class BottomSheet extends Dialog implements DialogInterface {
     BottomSheet(Context context, int theme, Builder builder) {
         super(context, theme);
 
-        TypedArray a = getContext().obtainStyledAttributes(null, R.styleable.BottomSheet, R.attr.bottomSheetStyle, 0);
+        TypedArray a = getContext()
+                .obtainStyledAttributes(null, R.styleable.BottomSheet, R.attr.bottomSheetStyle, 0);
         mHasContent = builder.hasContent;
         try {
             more = a.getDrawable(R.styleable.BottomSheet_bs_moreDrawable);
@@ -160,14 +167,18 @@ public class BottomSheet extends Dialog implements DialogInterface {
 
             if (theme == R.style.BottomSheet_DialogHorizontalContent) {
                 mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout,
-                        mHasContent ? R.layout.bs_list_entry_hor_two : R.layout.bs_list_entry_hor_one);
+                        mHasContent ? R.layout.bs_list_entry_hor_two
+                                : R.layout.bs_list_entry_hor_one);
             } else if (theme == R.style.BottomSheet_Dialog) {
-                mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout, R.layout.bs_list_entry_normal);
+                mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout,
+                        R.layout.bs_list_entry_normal);
             } else {
-                mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout, R.layout.bs_list_entry_normal);
+                mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout,
+                        R.layout.bs_list_entry_normal);
             }
 
-            mGridItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_gridItemLayout, R.layout.bs_grid_entry);
+            mGridItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_gridItemLayout,
+                    R.layout.bs_grid_entry);
 
         } finally {
             a.recycle();
@@ -215,7 +226,8 @@ public class BottomSheet extends Dialog implements DialogInterface {
 
     private void init(final Context context) {
         setCanceledOnTouchOutside(cancelOnTouchOutside);
-        final ClosableSlidingLayout mDialogView = (ClosableSlidingLayout) View.inflate(context, R.layout.bottom_sheet_dialog, null);
+        final ClosableSlidingLayout mDialogView = (ClosableSlidingLayout) View
+                .inflate(context, R.layout.bottom_sheet_dialog, null);
 
         LinearLayout mainLayout = (LinearLayout) mDialogView.findViewById(R.id.bs_main);
         mainLayout.addView(View.inflate(context, mHeaderLayoutId, null), 0);
@@ -281,7 +293,8 @@ public class BottomSheet extends Dialog implements DialogInterface {
         if (builder.grid) {
             for (int i = 0; i < getMenu().size(); i++) {
                 if (getMenu().getItem(i).getIcon() == null) {
-                    throw new IllegalArgumentException("You must set icon for each items in grid style");
+                    throw new IllegalArgumentException(
+                            "You must set icon for each items in grid style");
                 }
             }
         }
@@ -325,7 +338,7 @@ public class BottomSheet extends Dialog implements DialogInterface {
             public int getItemViewType(int position) {
                 MenuItem item = getItem(position);
                 String json = item.getTitle().toString();
-                int type = parseItemType(json);
+                int type = parseItemType(json) == null ? -1 : parseItemType(json);
                 switch (type) {
                     case ONE:
                         return ONE;
@@ -335,16 +348,10 @@ public class BottomSheet extends Dialog implements DialogInterface {
 
                     case NORMAL:
                         return NORMAL;
-                }
-//                if (parseItemContent(json) != null) {
-//                    if (!parseItemContent(json).trim().isEmpty()) {
-//                        return TWO;
-//                    } else  {
-//                        return ONE;
-//                    }
-//                }
 
-                return super.getItemViewType(position);
+                    default:
+                        return NORMAL;
+                }
             }
 
 
@@ -375,7 +382,9 @@ public class BottomSheet extends Dialog implements DialogInterface {
                 if (type == ONE) {
                     OneItemViewHolder holder;
                     if (convertView == null) {
-                        convertView = View.inflate(context, builder.grid ? mGridItemLayoutId : R.layout.bs_list_entry_hor_one, null);
+                        convertView = View.inflate(context,
+                                builder.grid ? mGridItemLayoutId : R.layout.bs_list_entry_hor_one,
+                                null);
                         holder = new OneItemViewHolder(convertView);
                         convertView.setTag(holder);
                     } else {
@@ -392,7 +401,9 @@ public class BottomSheet extends Dialog implements DialogInterface {
                 } else if (type == TWO) {
                     TwoItemViewHolder holder;
                     if (convertView == null) {
-                        convertView = View.inflate(context, builder.grid ? mGridItemLayoutId : R.layout.bs_list_entry_hor_two, null);
+                        convertView = View.inflate(context,
+                                builder.grid ? mGridItemLayoutId : R.layout.bs_list_entry_hor_two,
+                                null);
                         holder = new TwoItemViewHolder(convertView);
                         convertView.setTag(holder);
                     } else {
@@ -408,7 +419,9 @@ public class BottomSheet extends Dialog implements DialogInterface {
                 } else if (type == NORMAL) {
                     NormalItemViewHolder holder;
                     if (convertView == null) {
-                        convertView = View.inflate(context, builder.grid ? mGridItemLayoutId : R.layout.bs_list_entry_normal, null);
+                        convertView = View.inflate(context,
+                                builder.grid ? mGridItemLayoutId : R.layout.bs_list_entry_normal,
+                                null);
                         holder = new NormalItemViewHolder(convertView);
                         convertView.setTag(holder);
                     } else {
@@ -426,6 +439,7 @@ public class BottomSheet extends Dialog implements DialogInterface {
                 return convertView;
             }
 
+            @Nullable
             private String parseItemTitle(String json) {
                 try {
                     JSONObject jsonObject = new JSONObject(json);
@@ -433,7 +447,7 @@ public class BottomSheet extends Dialog implements DialogInterface {
                     return jsonTitle;
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    return "";
+                    return null;
                 }
             }
 
@@ -462,6 +476,7 @@ public class BottomSheet extends Dialog implements DialogInterface {
 
 
             class TwoItemViewHolder {
+
                 private TextView divider;
                 private TextView title;
                 private TextView mContent;
@@ -506,6 +521,7 @@ public class BottomSheet extends Dialog implements DialogInterface {
             }
 
             class NormalItemViewHolder {
+
                 private TextView title;
                 private ImageView image;
 
@@ -517,7 +533,7 @@ public class BottomSheet extends Dialog implements DialogInterface {
                 private void bindData2View(int position) {
                     MenuItem item = getItem(position);
                     String json = item.getTitle().toString();
-                    String titleText = parseItemTitle(json);
+                    String titleText = parseItemTitle(json) == null ? json : parseItemTitle(json);
 
                     title.setText(titleText);
                     if (item.getIcon() == null) {
@@ -530,10 +546,38 @@ public class BottomSheet extends Dialog implements DialogInterface {
                     image.setEnabled(item.isEnabled());
                     title.setEnabled(item.isEnabled());
                 }
-
             }
 
+//            class MenuItemViewHolder {
+//
+//                private TextView title;
+//                private ImageView image;
+//
+//                public MenuItemViewHolder(View convertView) {
+//                    title = (TextView) convertView.findViewById(R.id.bs_list_title);
+//                    image = (ImageView) convertView.findViewById(R.id.bs_list_image);
+//                }
+//
+//                private void bindData2View(int position) {
+//                    MenuItem item = getItem(position);
+//                    String titleText = item.getTitle().toString();
+////                    String titleText = parseItemTitle(json);
+//
+//                    title.setText(titleText);
+//                    if (item.getIcon() == null) {
+//                        image.setVisibility(collapseListIcons ? View.GONE : View.INVISIBLE);
+//                    } else {
+//                        image.setVisibility(View.VISIBLE);
+//                        image.setImageDrawable(item.getIcon());
+//                    }
+//
+//                    image.setEnabled(item.isEnabled());
+//                    title.setEnabled(item.isEnabled());
+//                }
+//            }
+
             class OneItemViewHolder {
+
                 private TextView divider;
                 private TextView title;
                 private ImageView image;
@@ -589,9 +633,11 @@ public class BottomSheet extends Dialog implements DialogInterface {
                         builder.menu.getClickListener().get(position).onClick(view);
                     } else {
                         if (builder.menulistener != null) {
-                            builder.menulistener.onMenuItemClick((MenuItem) adapter.getItem(position));
+                            builder.menulistener
+                                    .onMenuItemClick((MenuItem) adapter.getItem(position));
                         } else if (builder.listener != null) {
-                            builder.listener.onClick(BottomSheet.this, ((MenuItem) adapter.getItem(position)).getItemId());
+                            builder.listener.onClick(BottomSheet.this,
+                                    ((MenuItem) adapter.getItem(position)).getItemId());
                         }
                     }
                 }
@@ -800,7 +846,8 @@ public class BottomSheet extends Dialog implements DialogInterface {
             return sheet(title, null, listener);
         }
 
-        public Builder sheet(String title, @Nullable String content, View.OnClickListener listener) {
+        public Builder sheet(String title, @Nullable String content,
+                             View.OnClickListener listener) {
             JSONObject jsonWriter = new JSONObject();
             try {
                 jsonWriter.put("title", title);
