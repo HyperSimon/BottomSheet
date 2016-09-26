@@ -17,7 +17,6 @@ package com.roselism.bottomsheet;
  * limitations under the License.
  */
 
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.GridView;

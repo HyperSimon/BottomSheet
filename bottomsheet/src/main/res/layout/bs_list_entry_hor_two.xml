@@ -2,9 +2,9 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/BottomSheet.ListItem"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/bs_sheet_min_hight">
 
     <ImageView
         android:id="@id/bs_list_image"
@@ -26,6 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
+            android:text="[title]"
             android:textColor="@color/primary_text_dark"
             android:textSize="16sp" />
 
@@ -35,8 +36,15 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:gravity="center_horizontal"
+            android:text="[content]"
             android:textColor="@color/hint_text_dark" />
     </LinearLayout>
-</RelativeLayout>
 
-    <!-- From: file:/D:/develop/BottomSheet/library/src/main/res/layout/bs_list_entry.xml -->
+    <TextView
+        android:id="@+id/bs_list_divider"
+        style="@style/BottomSheet.TopDivider"
+        android:layout_alignParentBottom="true"
+        android:background="@color/bs_divider_color"
+        android:visibility="visible" />
+
+</RelativeLayout>

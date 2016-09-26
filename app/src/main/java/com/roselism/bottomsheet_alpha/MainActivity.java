@@ -1,11 +1,11 @@
 package com.roselism.bottomsheet_alpha;
 
-import com.roselism.bottomsheet.BottomSheet;
-
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+
+import com.roselism.bottomsheet.BottomSheet;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,21 +19,30 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 BottomSheet.Builder sheet = new BottomSheet.Builder(MainActivity.this,
-                        R.style.BottomSheet_DialogHorizontalContent);
+                        R.style.BottomSheet_Dialog);
 
-                sheet.sheet("sheet1", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+                sheet.sheet(30, "adsfasdf");
+//                sheet.sheet("sheet1", "adsf", new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//
+//                    }
+//                });
+//
+//                sheet.sheet("a", new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//
+//                    }
+//                });
+//
+//                sheet.sheet("sheet2", "adsf", new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//
+//                    }
+//                });
 
-                    }
-                });
-
-                sheet.sheet("sheet2", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                    }
-                });
 
                 sheet.build().show();
             }

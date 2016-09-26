@@ -16,9 +16,6 @@
 
 package com.roselism.bottomsheet;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
@@ -41,7 +38,6 @@ import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.util.SparseIntArray;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -55,6 +51,9 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -74,31 +73,35 @@ import java.util.ArrayList;
 @SuppressWarnings("unused")
 public class BottomSheet extends Dialog implements DialogInterface {
 
+    // FIXME: 16/9/26 应该放在 adapter 里面
+    public static final int ONE = 0x01;
+    public static final int TWO = 0x02;
+    public static final int NORMAL = 0x03;
+
     private final SparseIntArray hidden = new SparseIntArray();
-
     private TranslucentHelper helper;
-    private String            moreText;
-    private Drawable          close;
-    private Drawable          more;
-    private int               mHeaderLayoutId;
-    private int               mListItemLayoutId;
-    private int               mGridItemLayoutId;
-    private boolean           mHasContent;
+    private String moreText;
+    private Drawable close;
+    private Drawable more;
+    private int mHeaderLayoutId;
+    private int mListItemLayoutId;
+    private int mGridItemLayoutId;
+    private boolean mHasContent;
 
-    private boolean                    collapseListIcons;
-    private GridView                   list;
+    private boolean collapseListIcons;
+    private GridView list;
     private SimpleSectionedGridAdapter adapter;
-    private Builder                    builder;
-    private ImageView                  icon;
+    private Builder builder;
+    private ImageView icon;
 
-    private int     limit                = -1;
+    private int limit = -1;
     private boolean cancelOnTouchOutside = true;
-    private boolean cancelOnSwipeDown    = true;
-    private ActionMenu        fullMenuItem;
-    private ActionMenu        menuItem;
-    private ActionMenu        actions;
+    private boolean cancelOnSwipeDown = true;
+    private ActionMenu fullMenuItem;
+    private ActionMenu menuItem;
+    private ActionMenu actions;
     private OnDismissListener dismissListener;
-    private OnShowListener    showListener;
+    private OnShowListener showListener;
 
     // default
     BottomSheet(Context context) {
@@ -109,21 +112,27 @@ public class BottomSheet extends Dialog implements DialogInterface {
     BottomSheet(Context context, int theme) {
         super(context, theme);
 
-        TypedArray a = getContext()
-                .obtainStyledAttributes(null, R.styleable.BottomSheet, R.attr.bottomSheetStyle, 0);
+        TypedArray a = getContext().obtainStyledAttributes(null, R.styleable.BottomSheet, R.attr.bottomSheetStyle, 0);
+        mHasContent = builder.hasContent;
         try {
             more = a.getDrawable(R.styleable.BottomSheet_bs_moreDrawable);
             close = a.getDrawable(R.styleable.BottomSheet_bs_closeDrawable);
             moreText = a.getString(R.styleable.BottomSheet_bs_moreText);
-            mHasContent = a.getBoolean(R.styleable.BottomSheet_bs_has_content, false);
             collapseListIcons = a.getBoolean(R.styleable.BottomSheet_bs_collapseListIcons, true);
             mHeaderLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_headerLayout,
                     mHasContent ? R.layout.bs_header_center : R.layout.bs_header);
 
-            mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout,
-                    mHasContent ? R.layout.bs_list_entry_horizontal : R.layout.bs_list_entry);
-            mGridItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_gridItemLayout,
-                    R.layout.bs_grid_entry);
+            if (theme == R.style.BottomSheet_DialogHorizontalContent) {
+                mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout,
+                        mHasContent ? R.layout.bs_list_entry_hor_two : R.layout.bs_list_entry_hor_one);
+            } else if (theme == R.style.BottomSheet_Dialog) {
+                mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout, R.layout.bs_list_entry_normal);
+            } else {
+                mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout, R.layout.bs_list_entry_normal);
+            }
+
+            mGridItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_gridItemLayout, R.layout.bs_grid_entry);
+
         } finally {
             a.recycle();
         }
@@ -133,6 +142,43 @@ public class BottomSheet extends Dialog implements DialogInterface {
             helper = new TranslucentHelper(this, context);
         }
     }
+
+
+    @SuppressWarnings("WeakerAccess")
+    BottomSheet(Context context, int theme, Builder builder) {
+        super(context, theme);
+
+        TypedArray a = getContext().obtainStyledAttributes(null, R.styleable.BottomSheet, R.attr.bottomSheetStyle, 0);
+        mHasContent = builder.hasContent;
+        try {
+            more = a.getDrawable(R.styleable.BottomSheet_bs_moreDrawable);
+            close = a.getDrawable(R.styleable.BottomSheet_bs_closeDrawable);
+            moreText = a.getString(R.styleable.BottomSheet_bs_moreText);
+            collapseListIcons = a.getBoolean(R.styleable.BottomSheet_bs_collapseListIcons, true);
+            mHeaderLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_headerLayout,
+                    mHasContent ? R.layout.bs_header_center : R.layout.bs_header);
+
+            if (theme == R.style.BottomSheet_DialogHorizontalContent) {
+                mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout,
+                        mHasContent ? R.layout.bs_list_entry_hor_two : R.layout.bs_list_entry_hor_one);
+            } else if (theme == R.style.BottomSheet_Dialog) {
+                mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout, R.layout.bs_list_entry_normal);
+            } else {
+                mListItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_listItemLayout, R.layout.bs_list_entry_normal);
+            }
+
+            mGridItemLayoutId = a.getResourceId(R.styleable.BottomSheet_bs_gridItemLayout, R.layout.bs_grid_entry);
+
+        } finally {
+            a.recycle();
+        }
+
+        // https://github.com/jgilfelt/SystemBarTint/blob/master/library/src/com/readystatesoftware/systembartint/SystemBarTintManager.java
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            helper = new TranslucentHelper(this, context);
+        }
+    }
+
 
     /**
      * Hacky way to get gridview's column number
@@ -169,8 +215,7 @@ public class BottomSheet extends Dialog implements DialogInterface {
 
     private void init(final Context context) {
         setCanceledOnTouchOutside(cancelOnTouchOutside);
-        final ClosableSlidingLayout mDialogView = (ClosableSlidingLayout) View
-                .inflate(context, R.layout.bottom_sheet_dialog, null);
+        final ClosableSlidingLayout mDialogView = (ClosableSlidingLayout) View.inflate(context, R.layout.bottom_sheet_dialog, null);
 
         LinearLayout mainLayout = (LinearLayout) mDialogView.findViewById(R.id.bs_main);
         mainLayout.addView(View.inflate(context, mHeaderLayoutId, null), 0);
@@ -236,8 +281,7 @@ public class BottomSheet extends Dialog implements DialogInterface {
         if (builder.grid) {
             for (int i = 0; i < getMenu().size(); i++) {
                 if (getMenu().getItem(i).getIcon() == null) {
-                    throw new IllegalArgumentException(
-                            "You must set icon for each items in grid style");
+                    throw new IllegalArgumentException("You must set icon for each items in grid style");
                 }
             }
         }
@@ -266,6 +310,7 @@ public class BottomSheet extends Dialog implements DialogInterface {
 
         BaseAdapter baseAdapter = new BaseAdapter() {
 
+
             @Override
             public int getCount() {
                 return actions.size() - hidden.size();
@@ -277,13 +322,40 @@ public class BottomSheet extends Dialog implements DialogInterface {
             }
 
             @Override
+            public int getItemViewType(int position) {
+                MenuItem item = getItem(position);
+                String json = item.getTitle().toString();
+                int type = parseItemType(json);
+                switch (type) {
+                    case ONE:
+                        return ONE;
+
+                    case TWO:
+                        return TWO;
+
+                    case NORMAL:
+                        return NORMAL;
+                }
+//                if (parseItemContent(json) != null) {
+//                    if (!parseItemContent(json).trim().isEmpty()) {
+//                        return TWO;
+//                    } else  {
+//                        return ONE;
+//                    }
+//                }
+
+                return super.getItemViewType(position);
+            }
+
+
+            @Override
             public long getItemId(int position) {
                 return position;
             }
 
             @Override
             public int getViewTypeCount() {
-                return 1;
+                return 3;
             }
 
             @Override
@@ -298,68 +370,202 @@ public class BottomSheet extends Dialog implements DialogInterface {
 
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
-                ViewHolder holder;
-                if (convertView == null) {
-                    LayoutInflater inflater = (LayoutInflater) getContext()
-                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    if (builder.grid) {
-                        convertView = inflater.inflate(mGridItemLayoutId, parent, false);
+
+                int type = getItemViewType(position);
+                if (type == ONE) {
+                    OneItemViewHolder holder;
+                    if (convertView == null) {
+                        convertView = View.inflate(context, builder.grid ? mGridItemLayoutId : R.layout.bs_list_entry_hor_one, null);
+                        holder = new OneItemViewHolder(convertView);
+                        convertView.setTag(holder);
                     } else {
-                        convertView = inflater.inflate(mListItemLayoutId, parent, false);
+                        holder = (OneItemViewHolder) convertView.getTag();
                     }
-                    holder = new ViewHolder();
-                    holder.title = (TextView) convertView.findViewById(R.id.bs_list_title);
-                    holder.image = (ImageView) convertView.findViewById(R.id.bs_list_image);
-                    holder.content = (TextView) convertView.findViewById(R.id.bs_list_content);
-                    convertView.setTag(holder);
-                } else {
-                    holder = (ViewHolder) convertView.getTag();
-                }
 
-                for (int i = 0; i < hidden.size(); i++) {
-                    if (hidden.valueAt(i) <= position) {
-                        position++;
+                    for (int i = 0; i < hidden.size(); i++) {
+                        if (hidden.valueAt(i) <= position) {
+                            position++;
+                        }
                     }
-                }
+                    holder.bindData2View(position);
 
-                MenuItem item = getItem(position);
-                String json = item.getTitle().toString();
-
-                holder.title.setText(json);
-                if (item.getIcon() == null) {
-                    holder.image.setVisibility(collapseListIcons ? View.GONE : View.INVISIBLE);
-                } else {
-                    holder.image.setVisibility(View.VISIBLE);
-                    holder.image.setImageDrawable(item.getIcon());
-                }
-
-                try {
-                    JSONObject jsonObject = new JSONObject(json);
-                    String jsonTitle = jsonObject.getString("title");
-                    String content = jsonObject.getString("content");
-                    holder.title.setText(jsonTitle);
-                    if (content != null && !content.trim().isEmpty()) {
-                        holder.content.setText(content);
-                        holder.content.setVisibility(View.VISIBLE);
-                        holder.content.setEnabled(true);
+                } else if (type == TWO) {
+                    TwoItemViewHolder holder;
+                    if (convertView == null) {
+                        convertView = View.inflate(context, builder.grid ? mGridItemLayoutId : R.layout.bs_list_entry_hor_two, null);
+                        holder = new TwoItemViewHolder(convertView);
+                        convertView.setTag(holder);
                     } else {
-                        holder.content.setVisibility(View.INVISIBLE);
+                        holder = (TwoItemViewHolder) convertView.getTag();
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
 
-                holder.image.setEnabled(item.isEnabled());
-                holder.title.setEnabled(item.isEnabled());
+                    for (int i = 0; i < hidden.size(); i++) {
+                        if (hidden.valueAt(i) <= position) {
+                            position++;
+                        }
+                    }
+                    holder.bindData2View(position);
+                } else if (type == NORMAL) {
+                    NormalItemViewHolder holder;
+                    if (convertView == null) {
+                        convertView = View.inflate(context, builder.grid ? mGridItemLayoutId : R.layout.bs_list_entry_normal, null);
+                        holder = new NormalItemViewHolder(convertView);
+                        convertView.setTag(holder);
+                    } else {
+                        holder = (NormalItemViewHolder) convertView.getTag();
+                    }
+
+                    for (int i = 0; i < hidden.size(); i++) {
+                        if (hidden.valueAt(i) <= position) {
+                            position++;
+                        }
+                    }
+                    holder.bindData2View(position);
+                }
 
                 return convertView;
             }
 
-            class ViewHolder {
+            private String parseItemTitle(String json) {
+                try {
+                    JSONObject jsonObject = new JSONObject(json);
+                    String jsonTitle = jsonObject.getString("title");
+                    return jsonTitle;
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    return "";
+                }
+            }
 
-                private TextView  title;
-                private TextView  content;
+            private String parseItemContent(String json) {
+                try {
+                    JSONObject jsonObject = new JSONObject(json);
+                    String content = jsonObject.getString("mContent");
+                    return content;
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    return "";
+                }
+            }
+
+            @Nullable
+            private Integer parseItemType(String json) {
+                try {
+                    JSONObject jsonObject = new JSONObject(json);
+                    Integer type = jsonObject.getInt("type");
+                    return type;
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+
+            class TwoItemViewHolder {
+                private TextView divider;
+                private TextView title;
+                private TextView mContent;
                 private ImageView image;
+
+                public TwoItemViewHolder(View convertView) {
+                    title = (TextView) convertView.findViewById(R.id.bs_list_title);
+                    image = (ImageView) convertView.findViewById(R.id.bs_list_image);
+                    mContent = (TextView) convertView.findViewById(R.id.bs_list_content);
+                    divider = (TextView) convertView.findViewById(R.id.bs_list_divider);
+                }
+
+                private void bindData2View(int position) {
+                    MenuItem item = getItem(position);
+                    String json = item.getTitle().toString();
+
+//                    title.setText(json);
+                    if (item.getIcon() == null) {
+                        image.setVisibility(collapseListIcons ? View.GONE : View.INVISIBLE);
+                    } else {
+                        image.setVisibility(View.VISIBLE);
+                        image.setImageDrawable(item.getIcon());
+                    }
+
+                    boolean showDivider = getCount() > 1 && position != getCount() - 1;
+                    divider.setVisibility(showDivider ? View.VISIBLE : View.GONE);
+
+                    String itemTitle = parseItemTitle(json);
+                    String contentText = parseItemContent(json);
+                    title.setText(parseItemTitle(json));
+                    if (contentText != null && !contentText.trim().isEmpty()) {
+                        mContent.setText(contentText);
+                        mContent.setVisibility(View.VISIBLE);
+                        mContent.setEnabled(true);
+                    } else {
+                        mContent.setVisibility(View.INVISIBLE);
+                    }
+
+                    image.setEnabled(item.isEnabled());
+                    title.setEnabled(item.isEnabled());
+                }
+            }
+
+            class NormalItemViewHolder {
+                private TextView title;
+                private ImageView image;
+
+                public NormalItemViewHolder(View convertView) {
+                    title = (TextView) convertView.findViewById(R.id.bs_list_title);
+                    image = (ImageView) convertView.findViewById(R.id.bs_list_image);
+                }
+
+                private void bindData2View(int position) {
+                    MenuItem item = getItem(position);
+                    String json = item.getTitle().toString();
+                    String titleText = parseItemTitle(json);
+
+                    title.setText(titleText);
+                    if (item.getIcon() == null) {
+                        image.setVisibility(collapseListIcons ? View.GONE : View.INVISIBLE);
+                    } else {
+                        image.setVisibility(View.VISIBLE);
+                        image.setImageDrawable(item.getIcon());
+                    }
+
+                    image.setEnabled(item.isEnabled());
+                    title.setEnabled(item.isEnabled());
+                }
+
+            }
+
+            class OneItemViewHolder {
+                private TextView divider;
+                private TextView title;
+                private ImageView image;
+
+                public OneItemViewHolder(View convertView) {
+                    title = (TextView) convertView.findViewById(R.id.bs_list_title);
+                    image = (ImageView) convertView.findViewById(R.id.bs_list_image);
+                    divider = (TextView) convertView.findViewById(R.id.bs_list_divider);
+                }
+
+                private void bindData2View(int position) {
+                    MenuItem item = getItem(position);
+                    String json = item.getTitle().toString();
+
+                    title.setText(json);
+                    if (item.getIcon() == null) {
+                        image.setVisibility(collapseListIcons ? View.GONE : View.INVISIBLE);
+                    } else {
+                        image.setVisibility(View.VISIBLE);
+                        image.setImageDrawable(item.getIcon());
+                    }
+
+                    boolean showDivider = getCount() > 1 && position != getCount() - 1;
+                    divider.setVisibility(showDivider ? View.VISIBLE : View.GONE);
+
+                    String itemTitle = parseItemTitle(json);
+                    String content = parseItemContent(json);
+                    title.setText(parseItemTitle(json));
+
+                    image.setEnabled(item.isEnabled());
+                    title.setEnabled(item.isEnabled());
+                }
             }
         };
 
@@ -383,11 +589,9 @@ public class BottomSheet extends Dialog implements DialogInterface {
                         builder.menu.getClickListener().get(position).onClick(view);
                     } else {
                         if (builder.menulistener != null) {
-                            builder.menulistener
-                                    .onMenuItemClick((MenuItem) adapter.getItem(position));
+                            builder.menulistener.onMenuItemClick((MenuItem) adapter.getItem(position));
                         } else if (builder.listener != null) {
-                            builder.listener.onClick(BottomSheet.this,
-                                    ((MenuItem) adapter.getItem(position)).getItemId());
+                            builder.listener.onClick(BottomSheet.this, ((MenuItem) adapter.getItem(position)).getItemId());
                         }
                     }
                 }
@@ -400,7 +604,6 @@ public class BottomSheet extends Dialog implements DialogInterface {
         }
         setListLayout();
     }
-
 
     private void updateSection() {
         actions.removeInvisible();
@@ -497,7 +700,6 @@ public class BottomSheet extends Dialog implements DialogInterface {
                 });
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -527,7 +729,6 @@ public class BottomSheet extends Dialog implements DialogInterface {
         getWindow().setAttributes(params);
     }
 
-
     public Menu getMenu() {
         return builder.menu;
     }
@@ -550,14 +751,15 @@ public class BottomSheet extends Dialog implements DialogInterface {
 
     public static class Builder {
 
-        private final Context           context;
-        private final ActionMenu        menu;
-        private       int               theme;
-        private       CharSequence      title;
-        private       boolean           grid;
-        private       OnClickListener   listener;
-        private       OnDismissListener dismissListener;
-        private       Drawable          icon;
+        private final Context context;
+        private final ActionMenu menu;
+        private boolean hasContent;
+        private int theme;
+        private CharSequence title;
+        private boolean grid;
+        private OnClickListener listener;
+        private OnDismissListener dismissListener;
+        private Drawable icon;
         private int limit = -1;
         private MenuItem.OnMenuItemClickListener menulistener;
 
@@ -598,17 +800,13 @@ public class BottomSheet extends Dialog implements DialogInterface {
             return sheet(title, null, listener);
         }
 
-        /**
-         * @param content
-         * @param listener
-         * @return
-         */
-        public Builder sheet(String title, @Nullable String content,
-                View.OnClickListener listener) {
+        public Builder sheet(String title, @Nullable String content, View.OnClickListener listener) {
             JSONObject jsonWriter = new JSONObject();
             try {
                 jsonWriter.put("title", title);
-                jsonWriter.put("content", content == null ? "" : content);
+                jsonWriter.put("mContent", content == null ? "" : content);
+                jsonWriter.put("type", content == null ? BottomSheet.ONE : BottomSheet.TWO);
+                hasContent = content != null;
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -625,27 +823,60 @@ public class BottomSheet extends Dialog implements DialogInterface {
          * @return This Builder object to allow for chaining of calls to set methods
          */
         public Builder sheet(int id, @DrawableRes int iconRes, @StringRes int textRes) {
-            ActionMenuItem item = new ActionMenuItem(context, 0, id, 0, 0,
-                    context.getText(textRes));
+            JSONObject jsonWriter = new JSONObject();
+            try {
+                jsonWriter.put("title", context.getText(textRes));
+                jsonWriter.put("type", BottomSheet.NORMAL);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            ActionMenuItem item = new ActionMenuItem(context, 0, id, 0, 0, jsonWriter.toString());
             item.setIcon(iconRes);
             menu.add(item);
+
             return this;
         }
 
         public Builder sheet(int id, @NonNull Drawable icon, @NonNull CharSequence text) {
-            ActionMenuItem item = new ActionMenuItem(context, 0, id, 0, 0, text);
+            JSONObject jsonWriter = new JSONObject();
+            try {
+                jsonWriter.put("title", text);
+                jsonWriter.put("type", BottomSheet.NORMAL);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            ActionMenuItem item = new ActionMenuItem(context, 0, id, 0, 0, jsonWriter.toString());
             item.setIcon(icon);
             menu.add(item);
             return this;
         }
 
         public Builder sheet(int id, @StringRes int textRes) {
-            menu.add(0, id, 0, textRes);
+
+            JSONObject jsonWriter = new JSONObject();
+            try {
+                jsonWriter.put("title", context.getText(textRes));
+                jsonWriter.put("type", BottomSheet.NORMAL);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            menu.add(0, id, 0, jsonWriter.toString());
             return this;
         }
 
         public Builder sheet(int id, @NonNull CharSequence text) {
-            menu.add(0, id, 0, text);
+            JSONObject jsonWriter = new JSONObject();
+            try {
+                jsonWriter.put("title", text);
+                jsonWriter.put("type", BottomSheet.NORMAL);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            menu.add(0, id, 0, jsonWriter.toString());
             return this;
         }
 
@@ -696,7 +927,6 @@ public class BottomSheet extends Dialog implements DialogInterface {
             return this;
         }
 
-
         public Builder limit(@IntegerRes int limitRes) {
             limit = context.getResources().getInteger(limitRes);
             return this;
@@ -704,7 +934,7 @@ public class BottomSheet extends Dialog implements DialogInterface {
 
         @SuppressLint("Override")
         public BottomSheet build() {
-            BottomSheet dialog = new BottomSheet(context, theme);
+            BottomSheet dialog = new BottomSheet(context, theme, this);
             dialog.builder = this;
             return dialog;
         }
@@ -719,4 +949,152 @@ public class BottomSheet extends Dialog implements DialogInterface {
             return this;
         }
     }
+
+//    public static class MyAdapter extends BaseAdapter {
+//
+//        @Override
+//        public int getCount() {
+//            return actions.size() - hidden.size();
+//        }
+//
+//        @Override
+//        public MenuItem getItem(int position) {
+//            return actions.getItem(position);
+//        }
+//
+//
+//        @Override
+//        public int getItemViewType(int position) {
+//
+//
+//            return super.getItemViewType(position);
+//        }
+//
+//        @Override
+//        public long getItemId(int position) {
+//            return position;
+//        }
+//
+//        @Override
+//        public int getViewTypeCount() {
+//            return 2;
+//        }
+//
+//        @Override
+//        public boolean isEnabled(int position) {
+//            return getItem(position).isEnabled();
+//        }
+//
+//        @Override
+//        public boolean areAllItemsEnabled() {
+//            return false;
+//        }
+//
+//        @Override
+//        public View getView(int position, View convertView, ViewGroup parent) {
+//
+//            TwoItemViewHolder holder;
+//            if (convertView == null) {
+//                mListItemLayoutId = mHasContent ? R.layout.bs_list_entry_hor_two : R.layout.bs_list_entry_hor_one;
+//                convertView = View.inflate(context, builder.grid ? mGridItemLayoutId : mListItemLayoutId, null);
+//                holder = new TwoItemViewHolder(convertView);
+//                convertView.setTag(holder);
+//            } else {
+//                holder = (TwoItemViewHolder) convertView.getTag();
+//            }
+//
+//            for (int i = 0; i < hidden.size(); i++) {
+//                if (hidden.valueAt(i) <= position) {
+//                    position++;
+//                }
+//            }
+//
+//            bindData2View(position, holder);
+//
+//            return convertView;
+//        }
+//
+//        private String getItemTitle(String json) {
+//            try {
+//                JSONObject jsonObject = new JSONObject(json);
+//                String jsonTitle = jsonObject.getString("title");
+//                String mContent = jsonObject.getString("mContent");
+//                return jsonTitle;
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//                return "";
+//            }
+//        }
+//
+//        private String getItemContent(String json) {
+//            try {
+//                JSONObject jsonObject = new JSONObject(json);
+//                String mContent = jsonObject.getString("mContent");
+//                return mContent;
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//                return "";
+//            }
+//        }
+//
+//
+//        private void bindData2View(int position, TwoItemViewHolder holder) {
+//            MenuItem item = getItem(position);
+//            String json = item.getTitle().toString();
+//
+//            holder.title.setText(json);
+//            if (item.getIcon() == null) {
+//                holder.image.setVisibility(collapseListIcons ? View.GONE : View.INVISIBLE);
+//            } else {
+//                holder.image.setVisibility(View.VISIBLE);
+//                holder.image.setImageDrawable(item.getIcon());
+//            }
+//
+//            boolean showDivider = getCount() > 1 && position != getCount() - 1;
+//            holder.divider.setVisibility(showDivider ? View.VISIBLE : View.GONE);
+//
+//            String itemTitle = getItemTitle(json);
+//            String mContent = getItemContent(json);
+//            holder.title.setText(getItemTitle(json));
+//            if (mContent != null && !mContent.trim().isEmpty()) {
+//                holder.mContent.setText(mContent);
+//                holder.mContent.setVisibility(View.VISIBLE);
+//                holder.mContent.setEnabled(true);
+//            } else {
+//                holder.mContent.setVisibility(View.INVISIBLE);
+//            }
+//
+//
+//            holder.image.setEnabled(item.isEnabled());
+//            holder.title.setEnabled(item.isEnabled());
+//        }
+//
+//        class TwoItemViewHolder {
+//            private TextView divider;
+//            private TextView title;
+//            private TextView mContent;
+//            private ImageView image;
+//
+//            public TwoItemViewHolder(View convertView) {
+//                title = (TextView) convertView.findViewById(R.id.bs_list_title);
+//                image = (ImageView) convertView.findViewById(R.id.bs_list_image);
+//                mContent = (TextView) convertView.findViewById(R.id.bs_list_content);
+//                divider = (TextView) convertView.findViewById(R.id.bs_list_divider);
+//            }
+//        }
+//
+//        class OneItemViewHolder {
+//            private TextView divider;
+//            private TextView title;
+//            //                private TextView mContent;
+//            private ImageView image;
+//
+//            public OneItemViewHolder(View convertView) {
+//                title = (TextView) convertView.findViewById(R.id.bs_list_title);
+//                image = (ImageView) convertView.findViewById(R.id.bs_list_image);
+////                    mContent = (TextView) convertView.findViewById(R.id.bs_list_content);
+//                divider = (TextView) convertView.findViewById(R.id.bs_list_divider);
+//            }
+//        }
+//    }
 }

@@ -25,7 +25,7 @@
         <attr name="bs_listItemLayout" format="reference" />
         <attr name="bs_gridItemLayout" format="reference" />
         <attr name="bs_headerLayout" format="reference" />
-        <attr name="bs_has_content" format="boolean"></attr>
+        <!--<attr name="bs_has_content" format="boolean"></attr>-->
     </declare-styleable>
     <!-- From: file:/D:/develop/BottomSheet/library/src/main/res/values/dimens.xml -->
     <eat-comment />
@@ -89,13 +89,12 @@
         <item name="bs_headerLayout">@layout/bs_header</item>
     </style>
 
-
     <style name="BottomSheet.Dialog" parent="BottomSheet.DialogParent">
-        <item name="bs_listItemLayout">@layout/bs_list_entry</item>
+        <item name="bs_listItemLayout">@layout/bs_list_entry_normal</item>
     </style>
 
     <style name="BottomSheet.DialogHorizontalContent" parent="BottomSheet.DialogParent">
-        <item name="bs_listItemLayout">@layout/bs_list_entry_horizontal</item>
+        <item name="bs_listItemLayout">@layout/bs_list_entry_hor_two</item>
     </style>
 
     <style name="BottomSheet.Dialog.Dark" parent="BottomSheet.Dialog">
@@ -159,7 +158,7 @@
 
     <style name="BottomSheet.ListItem">
         <item name="android:layoutDirection" ns1:ignore="NewApi">locale</item>
-        <item name="android:minHeight">48dp</item>
+        <item name="android:minHeight">52dp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:layoutAnimation">@null</item>
     </style>
