@@ -27,7 +27,7 @@
 
     <TextView
         android:id="@+id/bs_list_divider"
-        style="@style/BottomSheet.TopDivider"
+        style="@style/BottomSheet.ListDivider_thin"
         android:layout_alignParentBottom="true"
         android:background="@color/bs_divider_color"
         android:visibility="visible" />

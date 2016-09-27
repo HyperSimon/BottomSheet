@@ -4,7 +4,6 @@ import com.roselism.bottomsheet.BottomSheet;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
@@ -22,24 +21,26 @@ public class MainActivity extends AppCompatActivity {
                 BottomSheet.Builder sheet = new BottomSheet.Builder(MainActivity.this,
                         R.style.BottomSheet_Dialog);
 
-                sheet.sheet(R.menu.main_menu)
-                        .listener(new MenuItem.OnMenuItemClickListener() {
-                            @Override
-                            public boolean onMenuItemClick(MenuItem item) {
-                                switch (item.getItemId()) {
-                                    case R.id.add_email_account:
-                                        return true;
+                sheet.sheet("Dropbox", "wz@youchai.me", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
 
-                                    case R.id.add_storage_account:
-                                        return true;
-                                }
+                    }
+                });
 
-                                return true;
-                            }
-                        });
-                sheet.sheet(111, "adfadfs");
-                sheet.sheet(1121, "adfadfs");
-                sheet.sheet(1131, "adfadfs");
+                sheet.sheet("Google Drive", "hero21c@outlook.com", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
+
+                sheet.sheet("Add Acccount", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
 
                 sheet.build().show();
             }

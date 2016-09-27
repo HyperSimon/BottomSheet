@@ -3,4 +3,6 @@
     <dimen name="activity_margin">16dp</dimen>
 
     <dimen name="bs_sheet_min_hight">48dp</dimen>
+    <dimen name="bs_two_sheet_min_hight">52dp</dimen>
+
 </resources>

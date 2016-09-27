@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="@dimen/bs_sheet_min_hight">
+    android:minHeight="@dimen/bs_two_sheet_min_hight">
 
     <ImageView
         android:id="@id/bs_list_image"
@@ -42,7 +42,7 @@
 
     <TextView
         android:id="@+id/bs_list_divider"
-        style="@style/BottomSheet.TopDivider"
+        style="@style/BottomSheet.ListDivider_thin"
         android:layout_alignParentBottom="true"
         android:background="@color/bs_divider_color"
         android:visibility="visible" />

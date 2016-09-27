@@ -218,6 +218,13 @@
         <item name="android:layout_marginBottom">8dp</item>
     </style>
 
+    <style name="BottomSheet.ListDivider_thin">
+        <item name="android:background">?bs_dividerColor</item>
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">0.5dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
     <style name="Text" />
 
     <style name="Text.Headline">
