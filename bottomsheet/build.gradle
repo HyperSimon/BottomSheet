@@ -3,7 +3,26 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'kotlin-android'
 
-version = "1.1.2"
+
+def getVersionTag = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags', '--abbrev=0'
+        standardOutput = stdout
+    }
+
+    // substring(1) 去除开头的 v
+    def name = stdout.toString().trim().substring(1)
+    return name
+}
+
+def getVersionNameFromTag = { ->
+    return getVersionTag().tokenize('+')[0]
+}
+
+def getVersionCodeFromTag = { ->
+    return getVersionTag().tokenize('+')[1].toInteger()
+}
 
 android {
     compileSdkVersion 24
@@ -45,11 +64,12 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 
+version = getVersionCodeFromTag
+group = "com.roselism"
+
 // 定义两个链接，下面会用到。
 def siteUrl = 'https://github.com/HyperSimon/BottomSheet' // 项目主页。
 def gitUrl = 'git@github.com:HyperSimon/BottomSheet.git' // Git仓库的url。
-
-group = "com.roselism"
 
 install {
     repositories.mavenInstaller {
